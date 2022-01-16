@@ -3,14 +3,15 @@ import reducer from "./helpers/reducers";
 import formatTimeRemaining from "./helpers/formatTime";
 
 function App() {
-   const [timeLimit, setTimeLimit] = useState(25);
-   const [breakTime, setBreaktime] = useState(5);
+   const [timeLimit, setTimeLimit] = useState(0.1);
+   const [breakTime, setBreaktime] = useState(0.2);
 
    const initialState = {
       timeLimitMs: timeLimit * 60 * 1000,
       timeRemaining: timeLimit * 60 * 1000,
       startTimestamp: null,
-      running: false
+      running: false,
+      isBreakTime: false
    };
 
    const [state, dispatch] = useReducer(reducer, initialState);
@@ -18,27 +19,39 @@ function App() {
    useEffect(() => {
       let timerId;
       if (state.running) {
+         if (state.isBreakTime && state.timeRemaining <= 0) {
+            dispatch({ type: "running", payload: false });
+         }
+
+         if (!state.isBreakTime) {
+            if (state.timeRemaining <= 0) {
+               dispatch([
+                  { type: "isBreakTime", payload: true },
+                  { type: "startTimestamp", payload: Date.now() },
+                  { type: "timeLimitMs", payload: breakTime * 60 * 1000 },
+                  { type: "timeRemaining", payload: breakTime * 60 * 1000 }
+               ]);
+            }
+         }
+
          timerId = setTimeout(() => {
             const timeElapsed = Date.now() - state.startTimestamp;
+            const payload = state.timeLimitMs - timeElapsed;
             dispatch({
                type: "timeRemaining",
-               payload: state.timeLimitMs - timeElapsed
+               payload: payload > 0 ? payload : 0
             });
          }, 10);
       }
-      return () => clearInterval(timerId);
-   }, [
-      state.running,
-      state.timeRemaining,
-      state.timeLimitMs,
-      state.startTimestamp
-   ]);
+      return () => clearTimeout(timerId);
+   }, [state, breakTime]);
 
    function resetTimer() {
       dispatch([
          { type: "timeLimitMs", payload: timeLimit * 60 * 1000 },
          { type: "timeRemaining", payload: timeLimit * 60 * 1000 },
-         { type: "running", payload: false }
+         { type: "running", payload: false },
+         { type: "isBreakTime", payload: false }
       ]);
    }
 
@@ -47,16 +60,21 @@ function App() {
          if (timeLimit + amount > 0 && timeLimit + amount <= 60) {
             setTimeLimit((state) => state + amount);
             dispatch([
-               { type: "timeLimitMs", payload: (timeLimit + amount) * 60 * 1000 },
-               { type: "timeRemaining", payload: (timeLimit + amount) * 60 * 1000 }
+               {
+                  type: "timeLimitMs",
+                  payload: (timeLimit + amount) * 60 * 1000
+               },
+               {
+                  type: "timeRemaining",
+                  payload: (timeLimit + amount) * 60 * 1000
+               }
             ]);
          }
       } else if (limit === "break") {
          if (breakTime + amount > 0 && breakTime + amount <= 60) {
             setBreaktime((state) => state + amount);
-         }         
+         }
       }
-      
    }
 
    return (

@@ -1,141 +1,92 @@
-import { useEffect, useState, useReducer, useRef } from "react";
-import reducer from "./helpers/reducers";
+import { useEffect, useState } from "react";
+import { useRef } from "react/cjs/react.development";
+import accurateInterval from "./helpers/interval";
 import formatTimeRemaining from "./helpers/formatTime";
 
-const DEFAULT_SESSION_TIME = 0.2;
-const DEFAULT_BREAK_TIME = 0.2;
-
 function App() {
-   const [sessionTime, setSessionTime] = useState(DEFAULT_SESSION_TIME);
-   const [breakTime, setBreaktime] = useState(DEFAULT_BREAK_TIME);
+   const [sessionLength, setSessionLength] = useState(25);
+   const [breakLength, setBreakLength] = useState(5);
+   const [timeRemaining, setTimeRemaining] = useState(1500);
+   const [currentTimer, setCurrentTimer] = useState("session");
+   const [running, setRunning] = useState(false);
+   const [timerId, setTimerId] = useState(null);
 
    const audioRef = useRef();
 
-   const initialState = {
-      timeLimitMs: DEFAULT_SESSION_TIME * 60 * 1000,
-      timeRemaining: DEFAULT_SESSION_TIME * 60 * 1000,
-      startTimestamp: null,
-      running: false,
-      isBreakTime: false
-   };
-
-   const [state, dispatch] = useReducer(reducer, initialState);
-
    useEffect(() => {
-      let timerId;
+      if (timeRemaining === 0) {
+         audioRef.current.play();
+         setTimeRemaining(
+            currentTimer === "session" ? breakLength * 60 : sessionLength * 60
+         );
+         setCurrentTimer(currentTimer === "session" ? "break" : "session");
+      }
+   }, [breakLength, sessionLength, currentTimer, timeRemaining, audioRef]);
 
-      if (state.running) {
-         if (state.isBreakTime && state.timeRemaining <= 0) {
-            audioRef.current.currentTime = 0;
-            audioRef.current.play();
-            dispatch([
-               { type: "isBreakTime", payload: false },
-               { type: "startTimestamp", payload: Date.now() },
-               { type: "timeLimitMs", payload: sessionTime * 60 * 1000 },
-               { type: "timeRemaining", payload: sessionTime * 60 * 1000 }
-            ]);
-         }
-
-         if (!state.isBreakTime) {
-            if (state.timeRemaining <= 0) {
-               audioRef.current.currentTime = 0;
-               audioRef.current.play();
-               dispatch([
-                  { type: "isBreakTime", payload: true },
-                  { type: "startTimestamp", payload: Date.now() },
-                  { type: "timeLimitMs", payload: breakTime * 60 * 1000 },
-                  { type: "timeRemaining", payload: breakTime * 60 * 1000 }
-               ]);
+   function changeTimerSetting(timer, amount) {
+      if (timer === "session") {
+         if (sessionLength + amount > 0 && sessionLength + amount <= 60) {
+            setSessionLength((state) => state + amount);
+            if (currentTimer === "session") {
+               setTimeRemaining((sessionLength + amount) * 60);
             }
          }
-
-         timerId = setTimeout(() => {
-            const timeElapsed = Date.now() - state.startTimestamp;
-            const payload = state.timeLimitMs - timeElapsed;
-            dispatch({
-               type: "timeRemaining",
-               payload: payload > 0 ? payload : 0
-            });
-         }, 10);
       }
-      return () => clearTimeout(timerId);
-   }, [state, breakTime, sessionTime]);
 
-   function changeTimerSetting(limit, amount) {
-      if (limit === "main") {
-         if (sessionTime + amount > 0 && sessionTime + amount <= 60) {
-            setSessionTime((state) => state + amount);
-            dispatch([
-               {
-                  type: "timeLimitMs",
-                  payload: (sessionTime + amount) * 60 * 1000
-               },
-               {
-                  type: "timeRemaining",
-                  payload: (sessionTime + amount) * 60 * 1000
-               }
-            ]);
+      if (timer === "break") {
+         if (breakLength + amount > 0 && breakLength + amount <= 60) {
+            setBreakLength((state) => state + amount);
+            if (currentTimer === "break") {
+               setTimeRemaining((breakLength + amount) * 60);
+            }
          }
-      } else if (limit === "break") {
-         if (breakTime + amount > 0 && breakTime + amount <= 60) {
-            setBreaktime((state) => state + amount);
-         }
+      }
+   }
+
+   function startTimer() {
+      timerId && timerId.cancel()
+      if (!running) {
+         setRunning(true);
+         setTimerId(accurateInterval(() =>{
+            setTimeRemaining((state) => state - 1);
+         }, 1000))
+      } else {
+         setRunning(false);
       }
    }
 
    function resetTimer() {
-      dispatch([
-         { type: "timeLimitMs", payload: DEFAULT_SESSION_TIME * 60 * 1000 },
-         { type: "timeRemaining", payload: DEFAULT_SESSION_TIME * 60 * 1000 },
-         { type: "running", payload: false },
-         { type: "isBreakTime", payload: false }
-      ]);
-      setSessionTime(25);
-      setBreaktime(5);
+      timerId && timerId.cancel()
+      setRunning(false);
+      setSessionLength(25);
+      setBreakLength(5);
+      setTimeRemaining(1500);
+      setCurrentTimer("session")
       audioRef.current.pause()
-   }
-
-   function toggleStartStop() {
-      dispatch([
-         { type: "running" },
-         { type: "startTimestamp", payload: Date.now() },
-         { type: "timeLimitMs", payload: state.timeRemaining }
-      ]);
-      audioRef.current.pause()
+      audioRef.current.currentTime = 0;
    }
 
    return (
       <section className="timer-container">
-         <p id="timer-label">{state.isBreakTime ? "break" : "session"}</p>
-         <p id="time-left">{formatTimeRemaining(state.timeRemaining)}</p>
-         <button
-            id="start_stop"
-            onClick={toggleStartStop}
-         >
+         <p id="timer-label">{currentTimer}</p>
+         <p id="time-left">{formatTimeRemaining(timeRemaining)}</p>
+         <button id="start_stop" onClick={startTimer}>
             start/stop
          </button>
-         <button id="reset" onClick={resetTimer}>
-            reset
-         </button>
-
-         <audio
-            id="beep"
-            ref={audioRef}
-            src="https://raw.githubusercontent.com/freeCodeCamp/cdn/master/build/testable-projects-fcc/audio/BeepSound.wav"
-         ></audio>
+         <button id="reset" onClick={resetTimer}>reset</button>
 
          <div className="time-setting">
-            <p id="session-label">Sessoin Length:</p>
-            <p id="session-length">{sessionTime}</p>
+            <p id="session-label">Session Length:</p>
+            <p id="session-length">{sessionLength}</p>
             <button
                id="session-decrement"
-               onClick={() => !state.running && changeTimerSetting("main", -1)}
+               onClick={() => !running && changeTimerSetting("session", -1)}
             >
                -
             </button>
             <button
                id="session-increment"
-               onClick={() => !state.running && changeTimerSetting("main", 1)}
+               onClick={() => !running && changeTimerSetting("session", 1)}
             >
                +
             </button>
@@ -143,20 +94,26 @@ function App() {
 
          <div className="time-setting">
             <p id="break-label">Break Length:</p>
-            <p id="break-length">{breakTime}</p>
+            <p id="break-length">{breakLength}</p>
             <button
                id="break-decrement"
-               onClick={() => !state.running && changeTimerSetting("break", -1)}
+               onClick={() => !running && changeTimerSetting("break", -1)}
             >
                -
             </button>
             <button
                id="break-increment"
-               onClick={() => !state.running && changeTimerSetting("break", 1)}
+               onClick={() => !running && changeTimerSetting("break", 1)}
             >
                +
             </button>
          </div>
+
+         <audio
+            id="beep"
+            ref={audioRef}
+            src="https://raw.githubusercontent.com/freeCodeCamp/cdn/master/build/testable-projects-fcc/audio/BeepSound.wav"
+         ></audio>
       </section>
    );
 }

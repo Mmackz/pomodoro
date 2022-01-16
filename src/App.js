@@ -2,13 +2,16 @@ import { useEffect, useState, useReducer } from "react";
 import reducer from "./helpers/reducers";
 import formatTimeRemaining from "./helpers/formatTime";
 
+const DEFAULT_SESSION_TIME = 25;
+const DEFAULT_BREAK_TIME = 5;
+
 function App() {
-   const [timeLimit, setTimeLimit] = useState(0.1);
-   const [breakTime, setBreaktime] = useState(0.2);
+   const [sessionTime, setSessionTime] = useState(DEFAULT_SESSION_TIME);
+   const [breakTime, setBreaktime] = useState(DEFAULT_BREAK_TIME);
 
    const initialState = {
-      timeLimitMs: timeLimit * 60 * 1000,
-      timeRemaining: timeLimit * 60 * 1000,
+      timeLimitMs: DEFAULT_SESSION_TIME * 60 * 1000,
+      timeRemaining: DEFAULT_SESSION_TIME * 60 * 1000,
       startTimestamp: null,
       running: false,
       isBreakTime: false
@@ -20,7 +23,12 @@ function App() {
       let timerId;
       if (state.running) {
          if (state.isBreakTime && state.timeRemaining <= 0) {
-            dispatch({ type: "running", payload: false });
+            dispatch([
+               { type: "isBreakTime", payload: false },
+               { type: "startTimestamp", payload: Date.now() },
+               { type: "timeLimitMs", payload: sessionTime * 60 * 1000 },
+               { type: "timeRemaining", payload: sessionTime * 60 * 1000 }
+            ]);
          }
 
          if (!state.isBreakTime) {
@@ -44,29 +52,31 @@ function App() {
          }, 10);
       }
       return () => clearTimeout(timerId);
-   }, [state, breakTime]);
+   }, [state, breakTime, sessionTime]);
 
    function resetTimer() {
       dispatch([
-         { type: "timeLimitMs", payload: timeLimit * 60 * 1000 },
-         { type: "timeRemaining", payload: timeLimit * 60 * 1000 },
+         { type: "timeLimitMs", payload: DEFAULT_SESSION_TIME * 60 * 1000 },
+         { type: "timeRemaining", payload: DEFAULT_SESSION_TIME * 60 * 1000 },
          { type: "running", payload: false },
          { type: "isBreakTime", payload: false }
       ]);
+      setSessionTime(25);
+      setBreaktime(5);
    }
 
    function changeTimerSetting(limit, amount) {
       if (limit === "main") {
-         if (timeLimit + amount > 0 && timeLimit + amount <= 60) {
-            setTimeLimit((state) => state + amount);
+         if (sessionTime + amount > 0 && sessionTime + amount <= 60) {
+            setSessionTime((state) => state + amount);
             dispatch([
                {
                   type: "timeLimitMs",
-                  payload: (timeLimit + amount) * 60 * 1000
+                  payload: (sessionTime + amount) * 60 * 1000
                },
                {
                   type: "timeRemaining",
-                  payload: (timeLimit + amount) * 60 * 1000
+                  payload: (sessionTime + amount) * 60 * 1000
                }
             ]);
          }
@@ -79,8 +89,10 @@ function App() {
 
    return (
       <section className="timer-container">
-         <p>{formatTimeRemaining(state.timeRemaining)}</p>
+         <p id="timer-label">{state.isBreakTime ? "break" : "session"}</p>
+         <p id="time-left">{formatTimeRemaining(state.timeRemaining)}</p>
          <button
+            id="start_stop"
             onClick={() => {
                dispatch([
                   { type: "running" },
@@ -91,30 +103,43 @@ function App() {
          >
             start/stop
          </button>
-         <button onClick={resetTimer}>reset</button>
-         <p>{timeLimit}</p>
-         <button
-            onClick={() => !state.running && changeTimerSetting("main", -1)}
-         >
-            -
-         </button>
-         <button
-            onClick={() => !state.running && changeTimerSetting("main", 1)}
-         >
-            +
+         <button id="reset" onClick={resetTimer}>
+            reset
          </button>
 
-         <p>{breakTime}</p>
-         <button
-            onClick={() => !state.running && changeTimerSetting("break", -1)}
-         >
-            -
-         </button>
-         <button
-            onClick={() => !state.running && changeTimerSetting("break", 1)}
-         >
-            +
-         </button>
+         <div className="time-setting">
+            <p id="session-label">Sessoin Length:</p>
+            <p id="session-length">{sessionTime}</p>
+            <button
+               id="session-decrement"
+               onClick={() => !state.running && changeTimerSetting("main", -1)}
+            >
+               -
+            </button>
+            <button
+               id="session-increment"
+               onClick={() => !state.running && changeTimerSetting("main", 1)}
+            >
+               +
+            </button>
+         </div>
+
+         <div className="time-setting">
+            <p id="break-label">Break Length:</p>
+            <p id="break-length">{breakTime}</p>
+            <button
+               id="break-decrement"
+               onClick={() => !state.running && changeTimerSetting("break", -1)}
+            >
+               -
+            </button>
+            <button
+               id="break-increment"
+               onClick={() => !state.running && changeTimerSetting("break", 1)}
+            >
+               +
+            </button>
+         </div>
       </section>
    );
 }

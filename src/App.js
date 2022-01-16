@@ -1,25 +1,104 @@
-import logo from './logo.svg';
-import './App.css';
+import { useEffect, useState, useReducer } from "react";
+import reducer from "./helpers/reducers";
+import formatTimeRemaining from "./helpers/formatTime";
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+   const [timeLimit, setTimeLimit] = useState(25);
+   const [breakTime, setBreaktime] = useState(5);
+
+   const initialState = {
+      timeLimitMs: timeLimit * 60 * 1000,
+      timeRemaining: timeLimit * 60 * 1000,
+      startTimestamp: null,
+      running: false
+   };
+
+   const [state, dispatch] = useReducer(reducer, initialState);
+
+   useEffect(() => {
+      let timerId;
+      if (state.running) {
+         timerId = setTimeout(() => {
+            const timeElapsed = Date.now() - state.startTimestamp;
+            dispatch({
+               type: "timeRemaining",
+               payload: state.timeLimitMs - timeElapsed
+            });
+         }, 10);
+      }
+      return () => clearInterval(timerId);
+   }, [
+      state.running,
+      state.timeRemaining,
+      state.timeLimitMs,
+      state.startTimestamp
+   ]);
+
+   function resetTimer() {
+      dispatch([
+         { type: "timeLimitMs", payload: timeLimit * 60 * 1000 },
+         { type: "timeRemaining", payload: timeLimit * 60 * 1000 },
+         { type: "running", payload: false }
+      ]);
+   }
+
+   function changeTimerSetting(limit, amount) {
+      if (limit === "main") {
+         if (timeLimit + amount > 0 && timeLimit + amount <= 60) {
+            setTimeLimit((state) => state + amount);
+            dispatch([
+               { type: "timeLimitMs", payload: (timeLimit + amount) * 60 * 1000 },
+               { type: "timeRemaining", payload: (timeLimit + amount) * 60 * 1000 }
+            ]);
+         }
+      } else if (limit === "break") {
+         if (breakTime + amount > 0 && breakTime + amount <= 60) {
+            setBreaktime((state) => state + amount);
+         }         
+      }
+      
+   }
+
+   return (
+      <section className="timer-container">
+         <p>{formatTimeRemaining(state.timeRemaining)}</p>
+         <button
+            onClick={() => {
+               dispatch([
+                  { type: "running" },
+                  { type: "startTimestamp", payload: Date.now() },
+                  { type: "timeLimitMs", payload: state.timeRemaining }
+               ]);
+            }}
+         >
+            start/stop
+         </button>
+         <button onClick={resetTimer}>reset</button>
+         <p>{timeLimit}</p>
+         <button
+            onClick={() => !state.running && changeTimerSetting("main", -1)}
+         >
+            -
+         </button>
+         <button
+            onClick={() => !state.running && changeTimerSetting("main", 1)}
+         >
+            +
+         </button>
+
+         <p>{breakTime}</p>
+         <button
+            onClick={() => !state.running && changeTimerSetting("break", -1)}
+         >
+            -
+         </button>
+         <button
+            onClick={() => !state.running && changeTimerSetting("break", 1)}
+         >
+            +
+         </button>
+      </section>
+   );
 }
 
 export default App;

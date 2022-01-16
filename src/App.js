@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useRef } from "react/cjs/react.development";
+import Display from "./components/Display/Display";
 import accurateInterval from "./helpers/interval";
-import formatTimeRemaining from "./helpers/formatTime";
 
 function App() {
    const [sessionLength, setSessionLength] = useState(25);
@@ -44,36 +44,38 @@ function App() {
    }
 
    function startTimer() {
-      timerId && timerId.cancel()
+      timerId && timerId.cancel();
       if (!running) {
          setRunning(true);
-         setTimerId(accurateInterval(() =>{
-            setTimeRemaining((state) => state - 1);
-         }, 1000))
+         setTimerId(
+            accurateInterval(() => {
+               setTimeRemaining((state) => state - 1);
+            }, 1000)
+         );
       } else {
          setRunning(false);
       }
    }
 
    function resetTimer() {
-      timerId && timerId.cancel()
+      timerId && timerId.cancel();
       setRunning(false);
       setSessionLength(25);
       setBreakLength(5);
       setTimeRemaining(1500);
-      setCurrentTimer("session")
-      audioRef.current.pause()
+      setCurrentTimer("session");
+      audioRef.current.pause();
       audioRef.current.currentTime = 0;
    }
 
    return (
       <section className="timer-container">
-         <p id="timer-label">{currentTimer}</p>
-         <p id="time-left">{formatTimeRemaining(timeRemaining)}</p>
-         <button id="start_stop" onClick={startTimer}>
-            start/stop
-         </button>
-         <button id="reset" onClick={resetTimer}>reset</button>
+         <Display
+            timerName={currentTimer}
+            remaining={timeRemaining}
+            start={startTimer}
+            reset={resetTimer}
+         />
 
          <div className="time-setting">
             <p id="session-label">Session Length:</p>

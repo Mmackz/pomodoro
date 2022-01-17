@@ -6,6 +6,7 @@ function Display(props) {
    return (
       <div className="display-container">
          <CircularProgress
+            aria-label="time left"
             value={percent}
             capIsRound
             color={timerName === "break" ? "#71ff7a" : "#70f4f9"}
@@ -22,14 +23,19 @@ function Display(props) {
          </div>
 
          <div className="icon-container">
-            <button id="start_stop" onClick={start} tabIndex="0">
+            <button
+               aria-label={running ? "pause" : "play"}
+               id="start_stop"
+               onClick={start}
+               tabIndex="0"
+            >
                {running ? (
                   <i className="fas fa-pause"></i>
                ) : (
                   <i className="fas fa-play"></i>
                )}
             </button>
-            <button id="reset" onClick={reset} tabIndex="0">
+            <button aria-label="reset" id="reset" onClick={reset} tabIndex="0">
                <svg
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="6 6 10 10"

@@ -58,7 +58,6 @@ function App() {
    function calculatePercent() {
       const timer = currentTimer === "session" ? sessionLength : breakLength;
       const percent = (meterTime / (timer * MS)) * 10;
-      console.log(percent);
       return percent;
    }
 

@@ -7,6 +7,7 @@ function Controls({ state, changeSetting }) {
             <p id="session-label">Session</p>
             <div className="number-box">
                <button
+                  aria-label="decrease session time"
                   id="session-decrement"
                   onClick={() => !running && changeSetting("session", -1)}
                >
@@ -15,6 +16,7 @@ function Controls({ state, changeSetting }) {
                <p id="session-length">{sessionLength}</p>
 
                <button
+                  aria-label="increase session time"
                   id="session-increment"
                   onClick={() => !running && changeSetting("session", 1)}
                >
@@ -27,6 +29,7 @@ function Controls({ state, changeSetting }) {
             <p id="break-label">Break</p>
             <div className="number-box">
                <button
+                  aria-label="decrease break time"
                   id="break-decrement"
                   onClick={() => !running && changeSetting("break", -1)}
                >
@@ -35,6 +38,7 @@ function Controls({ state, changeSetting }) {
                <p id="break-length">{breakLength}</p>
 
                <button
+                  aria-label="increase break time"
                   id="break-increment"
                   onClick={() => !running && changeSetting("break", 1)}
                >

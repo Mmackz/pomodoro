@@ -1,5 +1,4 @@
-import { useEffect, useState } from "react";
-import { useRef } from "react/cjs/react.development";
+import { useEffect, useState, useRef } from "react";
 import Controls from "./components/Controls/Controls";
 import Display from "./components/Display/Display";
 import accurateInterval from "./helpers/interval";

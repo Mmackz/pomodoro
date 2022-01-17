@@ -3,15 +3,15 @@ import { CircularProgress } from "@chakra-ui/progress";
 
 function Display(props) {
    const { percent, remaining, reset, running, start, timerName } = props;
-
+   // #71d9b1
    return (
       <div className="display-container">
          <CircularProgress
-            hasStripe
-            isAnimated
             value={percent}
             capIsRound
+            color={timerName === "break" ? "#71ff7a" : "#70f4f9"}
             trackColor="transparent"
+            thickness={4.5}
          />
          <div className="text-box">
             <p id="timer-label" className="timer-label">

@@ -1,5 +1,4 @@
 function formatTimeRemaining(time) {
-   console.log(time);
    let seconds = time;
    let minutes = seconds / 60;
    seconds = seconds % 60;

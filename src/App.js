@@ -97,6 +97,7 @@ function App() {
 
    return (
       <main className="main-container">
+         <h1>pomodoro</h1>
          <Display
             timerName={currentTimer}
             remaining={timeRemaining}

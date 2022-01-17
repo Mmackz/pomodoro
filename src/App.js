@@ -3,15 +3,17 @@ import { useRef } from "react/cjs/react.development";
 import Display from "./components/Display/Display";
 import accurateInterval from "./helpers/interval";
 
-const MS = 60 * 1000;
+const MS = 60;
 
 function App() {
    const [sessionLength, setSessionLength] = useState(25);
    const [breakLength, setBreakLength] = useState(5);
-   const [timeRemaining, setTimeRemaining] = useState(1500000);
+   const [timeRemaining, setTimeRemaining] = useState(1500);
    const [currentTimer, setCurrentTimer] = useState("session");
    const [running, setRunning] = useState(false);
    const [timerId, setTimerId] = useState(null);
+   const [percentMeter, setPercentMeter] = useState(null);
+   const [meterTime, setMeterTime] = useState(15000);
 
    const audioRef = useRef();
 
@@ -20,6 +22,11 @@ function App() {
          audioRef.current.play();
          setTimeRemaining(
             currentTimer === "session" ? breakLength * MS : sessionLength * MS
+         );
+         setMeterTime(
+            currentTimer === "session"
+               ? breakLength * MS * 10
+               : sessionLength * MS * 10
          );
          setCurrentTimer(currentTimer === "session" ? "break" : "session");
       }
@@ -31,6 +38,7 @@ function App() {
             setSessionLength((state) => state + amount);
             if (currentTimer === "session") {
                setTimeRemaining((sessionLength + amount) * MS);
+               setMeterTime((sessionLength + amount) * MS * 10);
             }
          }
       }
@@ -40,6 +48,7 @@ function App() {
             setBreakLength((state) => state + amount);
             if (currentTimer === "break") {
                setTimeRemaining((breakLength + amount) * MS);
+               setMeterTime((sessionLength + amount) * MS * 10);
             }
          }
       }
@@ -47,18 +56,25 @@ function App() {
 
    function calculatePercent() {
       const timer = currentTimer === "session" ? sessionLength : breakLength;
-      const percent = timeRemaining / (timer * MS) * 100
-      console.log(percent)
-      return percent
+      const percent = (meterTime / (timer * MS)) * 10;
+      console.log(percent);
+      return percent;
    }
 
    function startTimer() {
       timerId && timerId.cancel();
+      percentMeter && percentMeter.cancel();
       if (!running) {
          setRunning(true);
          setTimerId(
             accurateInterval(() => {
-               setTimeRemaining((state) => state - 100);
+               setTimeRemaining((state) => state - 1);
+            }, 1000)
+         );
+         setMeterTime(timeRemaining * 10);
+         setPercentMeter(
+            accurateInterval(() => {
+               setMeterTime((state) => state - 1);
             }, 100)
          );
       } else {
@@ -68,17 +84,19 @@ function App() {
 
    function resetTimer() {
       timerId && timerId.cancel();
+      percentMeter && percentMeter.cancel();
       setRunning(false);
       setSessionLength(25);
       setBreakLength(5);
-      setTimeRemaining(1500000);
+      setTimeRemaining(1500);
       setCurrentTimer("session");
+      setMeterTime(15000);
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
    }
 
    return (
-      <section className="main-container">
+      <main className="main-container">
          <Display
             timerName={currentTimer}
             remaining={timeRemaining}
@@ -88,46 +106,50 @@ function App() {
             percent={calculatePercent()}
          />
 
-         <div className="time-setting">
-            <p id="session-label">Session Length:</p>
-            <p id="session-length">{sessionLength}</p>
-            <button
-               id="session-decrement"
-               onClick={() => !running && changeTimerSetting("session", -1)}
-            >
-               -
-            </button>
-            <button
-               id="session-increment"
-               onClick={() => !running && changeTimerSetting("session", 1)}
-            >
-               +
-            </button>
-         </div>
+         {meterTime}
 
-         <div className="time-setting">
-            <p id="break-label">Break Length:</p>
-            <p id="break-length">{breakLength}</p>
-            <button
-               id="break-decrement"
-               onClick={() => !running && changeTimerSetting("break", -1)}
-            >
-               -
-            </button>
-            <button
-               id="break-increment"
-               onClick={() => !running && changeTimerSetting("break", 1)}
-            >
-               +
-            </button>
-         </div>
+         <section className="controls-container">
+            <div className="time-setting">
+               <p id="session-label">Session Length:</p>
+               <p id="session-length">{sessionLength}</p>
+               <button
+                  id="session-decrement"
+                  onClick={() => !running && changeTimerSetting("session", -1)}
+               >
+                  -
+               </button>
+               <button
+                  id="session-increment"
+                  onClick={() => !running && changeTimerSetting("session", 1)}
+               >
+                  +
+               </button>
+            </div>
+
+            <div className="time-setting">
+               <p id="break-label">Break Length:</p>
+               <p id="break-length">{breakLength}</p>
+               <button
+                  id="break-decrement"
+                  onClick={() => !running && changeTimerSetting("break", -1)}
+               >
+                  -
+               </button>
+               <button
+                  id="break-increment"
+                  onClick={() => !running && changeTimerSetting("break", 1)}
+               >
+                  +
+               </button>
+            </div>
+         </section>
 
          <audio
             id="beep"
             ref={audioRef}
             src="https://raw.githubusercontent.com/freeCodeCamp/cdn/master/build/testable-projects-fcc/audio/BeepSound.wav"
          ></audio>
-      </section>
+      </main>
    );
 }
 

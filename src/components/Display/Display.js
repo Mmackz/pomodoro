@@ -7,6 +7,8 @@ function Display(props) {
    return (
       <div className="display-container">
          <CircularProgress
+            hasStripe
+            isAnimated
             value={percent}
             capIsRound
             trackColor="transparent"

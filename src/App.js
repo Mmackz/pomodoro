@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useRef } from "react/cjs/react.development";
+import Controls from "./components/Controls/Controls";
 import Display from "./components/Display/Display";
 import accurateInterval from "./helpers/interval";
 
@@ -107,43 +108,10 @@ function App() {
             percent={calculatePercent()}
          />
 
-         {meterTime}
-
-         <section className="controls-container">
-            <div className="time-setting">
-               <p id="session-label">Session Length:</p>
-               <p id="session-length">{sessionLength}</p>
-               <button
-                  id="session-decrement"
-                  onClick={() => !running && changeTimerSetting("session", -1)}
-               >
-                  -
-               </button>
-               <button
-                  id="session-increment"
-                  onClick={() => !running && changeTimerSetting("session", 1)}
-               >
-                  +
-               </button>
-            </div>
-
-            <div className="time-setting">
-               <p id="break-label">Break Length:</p>
-               <p id="break-length">{breakLength}</p>
-               <button
-                  id="break-decrement"
-                  onClick={() => !running && changeTimerSetting("break", -1)}
-               >
-                  -
-               </button>
-               <button
-                  id="break-increment"
-                  onClick={() => !running && changeTimerSetting("break", 1)}
-               >
-                  +
-               </button>
-            </div>
-         </section>
+         <Controls
+            state={{ sessionLength, breakLength, running }}
+            changeSetting={changeTimerSetting}
+         />
 
          <audio
             id="beep"

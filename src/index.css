@@ -1,15 +1,21 @@
-@import url('https://fonts.googleapis.com/css2?family=Dongle:wght@700&family=Rubik:wght@400;500&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Dongle:wght@700&family=Rubik:wght@400;500&display=swap");
 
 html, body, #root {
-   height: 100%;
+   height: 100vh;
+   min-height: 100%;
+}
+
+html {
+   font-size: 16px;
 }
 
 body {
    margin: 0;
-   font-family: "Rubik", -apple-system, BlinkMacSystemFont, "Segoe UI",
-      "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+   font-family: "Rubik", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
+      "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
       "Helvetica Neue", sans-serif;
    -webkit-font-smoothing: antialiased;
+   -webkit-tap-highlight-color: transparent;
    -moz-osx-font-smoothing: grayscale;
    background: #1f2140;
    color: #d7def9;
@@ -26,13 +32,33 @@ p {
    margin: 0;
 }
 
+button {
+   padding: 0;
+   border: none;
+   outline: none;
+   font: inherit;
+   color: inherit;
+   background: none;
+   cursor: pointer;
+}
+
+div#root {
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   min-width: 280px;
+}
+
 .main-container {
    display: flex;
    flex-direction: column;
-   justify-content: center;
+   justify-content: space-around;
+   height: 100%;
+   max-height: 800px;
+   min-height: 300px;
    align-items: center;
    margin: 0 auto;
-   width: min(90vw, 480px);
+   width: min(90vw, 460px);
 }
 
 .chakra-progress,
@@ -51,7 +77,7 @@ p {
    content: "";
    position: absolute;
    top: 0;
-   background: rgb(20,24,51);
+   background: rgb(20, 24, 51);
    background: linear-gradient(135deg, #141833 0%, #292d50 100%);
    border-radius: 50%;
    width: 100%;
@@ -66,7 +92,7 @@ p {
    top: 3.5%;
    left: 3.5%;
    z-index: -1;
-   background: rgb(20,24,51);
+   background: rgb(20, 24, 51);
    border-radius: 50%;
    width: 93%;
    height: 93%;
@@ -86,6 +112,11 @@ p {
 .timer-label {
    position: absolute;
    top: 28%;
+   text-transform: uppercase;
+   font-family: "Dongle";
+   font-size: 1.75rem;
+   line-height: 0;
+   letter-spacing: -0.75px;
 }
 
 .time-left {
@@ -102,15 +133,23 @@ p {
    bottom: 18%;
    width: 100%;
    justify-content: center;
-   margin-left: 0.65rem;
 }
 
 .restart-icon {
-   width: 3.475rem;
-   margin-left: 0.5rem;
+   width: 2.2rem;
 }
 
-.fas {
+.icon-container > button {
+   padding: 0.75rem;
+   transition: all ease 300ms;
+}
+
+.icon-container > button:hover,
+.icon-container > button:focus {
+   transform: scale(1.15);
+}
+
+.icon-container .fas {
    font-size: 2rem;
    background: -webkit-linear-gradient(
       335deg,
@@ -127,5 +166,74 @@ p {
 /* controls component */
 .controls-container {
    display: flex;
-   gap: 1rem;
+   width: 100%;
+   justify-content: space-around;
+   margin: 2.5rem 0 1.5rem;
+}
+
+.time-setting > p {
+   text-align: center;
+   text-transform: uppercase;
+   font-family: "Dongle";
+   line-height: 0;
+   font-size: 1.5rem;
+   letter-spacing: -0.75px;
+   margin-bottom: 0.55rem;
+}
+
+.number-box {
+   display: flex;
+   align-items: center;
+}
+
+.number-box > button {
+   padding: 1rem;
+   transition: all ease 300ms;
+}
+
+.number-box > p {
+   font-size: 2.5rem;
+   margin: 0;
+   min-width: 2.75rem;
+   text-align: center;
+}
+
+.number-box i {
+   font-size: 1.25rem;
+}
+
+.number-box > button:hover,
+.number-box > button:focus {
+   color: #f8b8b8;
+   transform: scale(1.1);
+}
+
+.number-box > button:last-child:hover,
+.number-box > button:last-child:focus {
+   color: #b8f8dc;
+}
+
+@media (max-width: 460px) {
+   html {
+      font-size: 15px;
+   }
+   html,
+   body,
+   #root {
+      height: 100%;
+   }
+}
+
+@media (max-width: 350px) {
+   html {
+      font-size: 14px;
+   }
+
+   .main-container {
+      max-height: 720px;
+   }
+
+   .time-left {
+      font-size: 4.75rem;
+   }
 }

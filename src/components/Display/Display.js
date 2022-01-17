@@ -3,7 +3,6 @@ import { CircularProgress } from "@chakra-ui/progress";
 
 function Display(props) {
    const { percent, remaining, reset, running, start, timerName } = props;
-   // #71d9b1
    return (
       <div className="display-container">
          <CircularProgress
@@ -23,17 +22,17 @@ function Display(props) {
          </div>
 
          <div className="icon-container">
-            <div id="start_stop" onClick={start}>
+            <button id="start_stop" onClick={start} tabIndex="0">
                {running ? (
                   <i className="fas fa-pause"></i>
                ) : (
                   <i className="fas fa-play"></i>
                )}
-            </div>
-            <div id="reset" onClick={reset}>
+            </button>
+            <button id="reset" onClick={reset} tabIndex="0">
                <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  viewBox="3 3 16 16"
+                  viewBox="6 6 10 10"
                   className="restart-icon"
                >
                   <defs>
@@ -49,7 +48,7 @@ function Display(props) {
                      transform="matrix(.07192 0 0 .07192 6.674 6.768)"
                   />
                </svg>
-            </div>
+            </button>
          </div>
       </div>
    );

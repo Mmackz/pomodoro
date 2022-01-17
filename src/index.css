@@ -1,13 +1,83 @@
+@import url("https://fonts.googleapis.com/css2?family=Barlow:wght@400;500&display=swap");
+
 body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+   margin: 0;
+   font-family: "Barlow", -apple-system, BlinkMacSystemFont, "Segoe UI",
+      "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+      "Helvetica Neue", sans-serif;
+   -webkit-font-smoothing: antialiased;
+   -moz-osx-font-smoothing: grayscale;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+p {
+   margin: 0;
+}
+
+.main-container {
+   display: flex;
+   flex-direction: column;
+   justify-content: center;
+   align-items: center;
+   width: min(90vw, 500px);
+}
+
+.chakra-progress,
+.chakra-progress > svg {
+   line-height: 0;
+   width: 100%;
+   height: 100%;
+}
+
+.display-container {
+   position: relative;
+   width: 100%;
+}
+
+.text-box {
+   position: absolute;
+   top: 0;
+   width: 100%;
+   height: 100%;
+   display: flex;
+   flex-direction: column;
+   justify-content: center;
+   align-items: center;
+}
+
+.timer-label {
+   position: absolute;
+   top: 30%;
+}
+
+.time-left {
+   font-size: 4.5rem;
+}
+
+.icon-container {
+   display: flex;
+   align-items: center;
+   position: absolute;
+   bottom: 18%;
+   width: 100%;
+   justify-content: center;
+   margin-left: 0.65rem;
+}
+
+.restart-icon {
+   width: 3.475rem;
+   margin-left: 0.5rem;
+}
+
+.fas {
+   font-size: 2rem;
+   background: -webkit-linear-gradient(
+      335deg,
+      red,
+      rgb(255, 94, 0),
+      orange,
+      yellow
+   );
+   background-clip: text;
+   -webkit-background-clip: text;
+   -webkit-text-fill-color: transparent;
 }

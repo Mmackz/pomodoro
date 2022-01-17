@@ -3,10 +3,12 @@ import { useRef } from "react/cjs/react.development";
 import Display from "./components/Display/Display";
 import accurateInterval from "./helpers/interval";
 
+const MS = 60 * 1000;
+
 function App() {
    const [sessionLength, setSessionLength] = useState(25);
    const [breakLength, setBreakLength] = useState(5);
-   const [timeRemaining, setTimeRemaining] = useState(1500);
+   const [timeRemaining, setTimeRemaining] = useState(1500000);
    const [currentTimer, setCurrentTimer] = useState("session");
    const [running, setRunning] = useState(false);
    const [timerId, setTimerId] = useState(null);
@@ -17,7 +19,7 @@ function App() {
       if (timeRemaining === 0) {
          audioRef.current.play();
          setTimeRemaining(
-            currentTimer === "session" ? breakLength * 60 : sessionLength * 60
+            currentTimer === "session" ? breakLength * MS : sessionLength * MS
          );
          setCurrentTimer(currentTimer === "session" ? "break" : "session");
       }
@@ -28,7 +30,7 @@ function App() {
          if (sessionLength + amount > 0 && sessionLength + amount <= 60) {
             setSessionLength((state) => state + amount);
             if (currentTimer === "session") {
-               setTimeRemaining((sessionLength + amount) * 60);
+               setTimeRemaining((sessionLength + amount) * MS);
             }
          }
       }
@@ -37,10 +39,17 @@ function App() {
          if (breakLength + amount > 0 && breakLength + amount <= 60) {
             setBreakLength((state) => state + amount);
             if (currentTimer === "break") {
-               setTimeRemaining((breakLength + amount) * 60);
+               setTimeRemaining((breakLength + amount) * MS);
             }
          }
       }
+   }
+
+   function calculatePercent() {
+      const timer = currentTimer === "session" ? sessionLength : breakLength;
+      const percent = timeRemaining / (timer * MS) * 100
+      console.log(percent)
+      return percent
    }
 
    function startTimer() {
@@ -49,8 +58,8 @@ function App() {
          setRunning(true);
          setTimerId(
             accurateInterval(() => {
-               setTimeRemaining((state) => state - 1);
-            }, 1000)
+               setTimeRemaining((state) => state - 100);
+            }, 100)
          );
       } else {
          setRunning(false);
@@ -62,19 +71,21 @@ function App() {
       setRunning(false);
       setSessionLength(25);
       setBreakLength(5);
-      setTimeRemaining(1500);
+      setTimeRemaining(1500000);
       setCurrentTimer("session");
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
    }
 
    return (
-      <section className="timer-container">
+      <section className="main-container">
          <Display
             timerName={currentTimer}
             remaining={timeRemaining}
+            running={running}
             start={startTimer}
             reset={resetTimer}
+            percent={calculatePercent()}
          />
 
          <div className="time-setting">
